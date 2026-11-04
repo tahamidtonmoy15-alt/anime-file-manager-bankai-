@@ -156,10 +156,12 @@ const seed = [
 ["Dr. Stone: Ryusui","OVA / Specials"],["Ranking of Kings: Treasure Chest of Courage","OVA / Specials"],["My Hero Academia: Memories","OVA / Specials"],["Kaiju No. 8: Narumi's Week at Work","OVA / Specials"]
 ];
 const key='hindiDubAnimeTracker_v1';
-let custom=JSON.parse(localStorage.getItem(key)||'[]');
-let statuses=JSON.parse(localStorage.getItem(key+'_statuses')||'{}');
+let custom=[];
+try{const savedCustom=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(savedCustom))custom=savedCustom.filter(x=>x&&typeof x.name==='string');}catch(e){console.warn('Saved anime data could not be read; using starter catalogue.',e)}
+let statuses={};
+try{const savedStatuses=JSON.parse(localStorage.getItem(key+'_statuses')||'{}');if(savedStatuses&&typeof savedStatuses==='object'&&!Array.isArray(savedStatuses))statuses=savedStatuses;}catch(e){console.warn('Saved watch statuses could not be read; using empty statuses.',e)}
 let active='All'; let activeGenre='All';
-let anime=[];function rebuild(){anime=[...new Map([...seed.map(([name,genre])=>({name,genre,dub:'যাচাই বাকি'})),...custom].map(x=>[x.name.toLowerCase(),x])).values()]}rebuild();
+let anime=[];function rebuild(){const validCustom=custom.filter(x=>x&&typeof x.name==='string'&&x.name.trim());anime=[...new Map([...seed.map(([name,genre])=>({name,genre,dub:'যাচাই বাকি'})),...validCustom].map(x=>[x.name.toLowerCase(),x])).values()]}rebuild();
 const genres=['All','Action','Fantasy / Isekai','Romance / Drama','Mystery / Thriller','Sports','Comedy / Slice of Life','Sci-Fi / Mecha','Horror / Supernatural','Anime Movies','OVA / Specials'];
 function genreList(){const have=new Set(anime.map(a=>a.genre));return['All',...genres.slice(1).filter(g=>have.has(g)),...[...have].filter(g=>!genres.includes(g))]}
 const folders=[['All','সব Anime'],['watched','সম্পূর্ণ দেখেছি'],['partial','আংশিক দেখেছি'],['unwatched','এখনো দেখিনি']];
@@ -379,7 +381,7 @@ function importData(e){
 }
 
 /* ===== Watching Dashboard ===== */
-let W=JSON.parse(localStorage.getItem('hdaWatch_v1')||'{}');
+let W={};try{const savedWatching=JSON.parse(localStorage.getItem('hdaWatch_v1')||'{}');if(savedWatching&&typeof savedWatching==='object'&&!Array.isArray(savedWatching))W=savedWatching;}catch(e){console.warn('Saved Watching data could not be read; using empty list.',e)}
 const saveW=()=>localStorage.setItem('hdaWatch_v1',JSON.stringify(W));
 const DAYS=['রবি','সোম','মঙ্গল','বুধ','বৃহস্পতি','শুক্র','শনি'];
 let dayF='all',editing='',openN=new Set();
