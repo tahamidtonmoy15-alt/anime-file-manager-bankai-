@@ -1,69 +1,29 @@
-name: Build Anime File Manager APK
-
+name: Build NOVA Android 15 APK
 on:
   push:
-    branches: [main, master]
+    branches: [android15-clean-rebuild]
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
-      - name: Prepare Capacitor project files
-        run: |
-          mkdir -p www
-          cp "index (3).html" www/index.html
-          cp "package (1).json" package.json
-          cp "capacitor.config (1).json" capacitor.config.json
-          cp "icon-192 (2).png" www/icon-192.png
-          cp "icon-512 (1).png" www/icon-512.png
-          cp "manifest (2).webmanifest" www/manifest.webmanifest
-          cp "sw (2).js" www/sw.js
-
-      - name: Install dependencies and create Android project
-        run: |
-          npm install
-          npx cap add android
-
-      - name: Add existing native Java plugin
-        run: |
-          PKG=android/app/src/main/java/com/hda/anime
-          mkdir -p "$PKG" android/app/src/main/res/xml
-          cp "ExternalPlayerPlugin (1).java" "$PKG/ExternalPlayerPlugin.java"
-          cp "MainActivity (1).java" "$PKG/MainActivity.java"
-          cp "file_paths (1).xml" android/app/src/main/res/xml/file_paths.xml
-          python3 "add_provider (1).py"
-
-      - name: Sync Capacitor
-        run: npx cap sync android
-
-      - name: Build debug APK
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
-
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
         with:
-          name: anime-file-manager-bankai-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          gradle-version: '8.9'
+      - name: Install Android SDK 35
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Build debug APK
+        run: gradle --no-daemon assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nova-android15-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
-          retention-days: 14
