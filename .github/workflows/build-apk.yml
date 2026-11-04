@@ -19,8 +19,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: package.json
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -38,8 +36,6 @@ jobs:
           cp "icon-512 (1).png" www/icon-512.png
           cp "manifest (2).webmanifest" www/manifest.webmanifest
           cp "sw (2).js" www/sw.js
-          cat > www/.nojekyll <<'EOF'
-          EOF
 
       - name: Install dependencies and create Android project
         run: |
@@ -71,5 +67,3 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
-
-# Trigger build from the latest main branch commit.
